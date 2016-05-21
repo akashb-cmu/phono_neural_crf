@@ -224,13 +224,30 @@ def evaluate(parameters, f_eval, raw_sentences, parsed_sentences,
     n_tags = len(id_to_tag)
     predictions = []
     count = np.zeros((n_tags, n_tags), dtype=np.int32)
-
+    tot_sents = 0
+    prob_sents = 0
     for raw_sentence, data in zip(raw_sentences, parsed_sentences):
+        tot_sents += 1
         input = create_input(data, parameters, False)
-        if parameters['crf']:
-            y_preds = np.array(f_eval(*input))[1:-1]
-        else:
-            y_preds = f_eval(*input).argmax(axis=1)
+	if parameters['char_dim']:
+            if parameters['word_dim']:
+                char_for = input[1]
+            else:
+                char_for = input[0]
+            if len(char_for) < 1:
+                continue
+        try:
+            if parameters['crf']:
+                y_preds = np.array(f_eval(*input))[1:-1]
+            else:
+                y_preds = f_eval(*input).argmax(axis=1)
+        except Exception as e:
+                prob_sents += 1
+                print("Input is:",input)
+                print("Raw sentence:", raw_sentence)
+                print("Raw sentence:", data)
+                #print("Exception is:", e)
+                continue
         y_reals = np.array(data['tags']).astype(np.int32)
         assert len(y_preds) == len(y_reals)
         p_tags = [id_to_tag[y_pred] for y_pred in y_preds]
@@ -243,7 +260,7 @@ def evaluate(parameters, f_eval, raw_sentences, parsed_sentences,
             predictions.append(new_line)
             count[y_real, y_pred] += 1
         predictions.append("")
-
+    print("Skipped %f sentences in the eval step"%(prob_sents * 1.0 / tot_sents))
     # Write predictions to disk and run CoNLL script externally
     eval_id = np.random.randint(1000000, 2000000)
     output_path = os.path.join(eval_temp, "eval.%i.output" % eval_id)

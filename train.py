@@ -92,6 +92,11 @@ optparser.add_option(
     "-r", "--reload", default="0",
     type='int', help="Reload the last saved model"
 )
+optparser.add_option(
+    "-N", "--model_name", default="garbage_model",
+    type='str', help="Custom model name"
+)
+
 opts = optparser.parse_args()[0]
 
 # Parse parameters
@@ -111,6 +116,7 @@ parameters['cap_dim'] = opts.cap_dim
 parameters['crf'] = opts.crf == 1
 parameters['dropout'] = opts.dropout
 parameters['lr_method'] = opts.lr_method
+parameters['model_name'] = opts.model_name
 
 # Check parameters validity
 assert os.path.isfile(opts.train)
