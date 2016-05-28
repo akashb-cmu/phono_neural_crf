@@ -52,9 +52,53 @@ class HiddenLayer(object):
         return self.output
 
 
+
+class TimeDistributedDenseLayer(object):
+    """
+    Embedding layer: word time_distr_dense representations
+    Input: tensor of dimension (dim*) with values in range(0, input_dim)
+    Output: tensor of dimension (dim*, output_dim)
+    """
+
+    def __init__(self, input_dim, output_dim, name='time_distributed_layer', activation="tanh"):
+        """
+        Typically, input_dim is the vocabulary size,
+        and output_dim the embedding dimension.
+        """
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        self.name = name
+        self.activation = activation
+
+        # Randomly generate weights
+        self.time_distr_dense = shared((input_dim, output_dim),
+                                       self.name + '__dense_mat')
+        self.b = shared((output_dim,), self.name + '_dense_bias')
+
+        # Define parameters
+        self.params = [self.time_distr_dense]
+
+    def link(self, input):
+        """
+        Return the time_distr_dense of the given input.
+        Input: tensor of shape (dim*, self.input_dim)
+        Output: tensor of shape (dim*, self.output_dim)
+        """
+        self.input = input
+        self.output = T.dot(self.input, self.time_distr_dense) + self.b
+        if self.activation == "tanh":
+            self.output = T.tanh(self.output)
+        elif self.activation == "sigmoid":
+            self.output = T.nnet.sigmoid(self.output)
+        elif self.activation != "linear":
+            assert False, "Invalid activation"
+        return self.output
+
+
+
 class EmbeddingLayer(object):
     """
-    Embedding layer: word embeddings representations
+    Embedding layer: word time_distr_dense representations
     Input: tensor of dimension (dim*) with values in range(0, input_dim)
     Output: tensor of dimension (dim*, output_dim)
     """

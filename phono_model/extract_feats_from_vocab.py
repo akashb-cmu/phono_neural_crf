@@ -62,7 +62,8 @@ trg_vocab_dir = args.trg_vocab_dir
 trg_lang_code = args.trg_lang_code
 trg_lang_space = args.trg_lang_space
 
-word_categories = ['L', 'M', 'N', 'P', 'S', 'Z', 'C']
+# word_categories = ['L', 'M', 'N', 'P', 'S', 'Z', 'C']
+word_categories = default_word_categories
 # List obtained from epitran repo https://github.com/dmort27/epitran
 
 

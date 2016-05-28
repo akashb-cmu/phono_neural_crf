@@ -35,7 +35,7 @@ assert os.path.isfile(opts.input)
 
 # Load existing model
 print "Loading model..."
-model = Model(model_path=opts.model)
+model = Model(old_model_dir=opts.model)
 parameters = model.parameters
 
 # Load reverse mappings

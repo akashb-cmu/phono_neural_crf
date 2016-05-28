@@ -6,7 +6,16 @@ import codecs
 
 sys.path.append("../epitran/epitran/bin/")
 sys.path.append("../epitran/epitran/")
+import vector
 
+default_word_categories = ['L', 'M', 'N', 'P', 'S', 'Z', 'C']
+
+
+lang_to_epi_dict = \
+{
+    "turkish": vector.VectorsWithIPASpace("tur-Latn", "tur-Latn-suf"),
+    "uzbek": vector.VectorsWithIPASpace("uzb-Latn", "uzb-Latn-suf")
+}
 
 def read_vocab_file(file, vocab_set=set()):
     """
