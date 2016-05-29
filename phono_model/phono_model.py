@@ -313,7 +313,8 @@ class Model(object):
         if len(inputs) != 1:
             inputs = T.concatenate(inputs, axis=1)
             # TO DO : If using type sparse features, then apply hidden layer after concatenating all inputs
-
+        else:
+            inputs = inputs[0]
         #
         # Dropout on final input
         #

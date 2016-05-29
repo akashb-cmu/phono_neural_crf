@@ -4,7 +4,9 @@ import pickle
 import sys
 import codecs
 
-sys.path.append("../epitran/epitran/bin/")
+# sys.path.append("../epitran/epitran/bin/")
+# sys.path.append("../epitran/epitran/")
+sys.path.append("../epitran/epitran/bin")
 sys.path.append("../epitran/epitran/")
 import vector
 

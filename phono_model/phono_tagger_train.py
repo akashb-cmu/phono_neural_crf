@@ -16,6 +16,8 @@ from loader import tag_mapping
 from loader import update_tag_scheme
 from phono_model import Model
 import my_utils
+import cPickle
+
 
 # Read parameters from command line
 optparser = optparse.OptionParser()
@@ -172,11 +174,18 @@ optparser.add_option(
     type='str', help="Source language",
 )
 
+optparser.add_option(
+    "--n_epochs", default=100,
+    type='int', help="Number of epochs",
+)
+
 opts1 = optparser.parse_args()
 opts = optparser.parse_args()[0]
 
 # Parse parameters
 parameters = OrderedDict()
+n_epochs = opts.n_epochs
+
 
 parameters['tag_scheme'] = opts.tag_scheme
 parameters['lower'] = opts.lower == 1
@@ -366,10 +375,15 @@ print("Starting the training procedure")
 #
 # Train network
 #
-n_epochs = 100  # number of epochs over the training set
+# n_epochs = 100  # number of epochs over the training set
 freq_eval = 1000  # evaluate on dev every freq_eval steps
 best_dev = -np.inf
 best_test = -np.inf
+batch_wise_dev_scores = []
+batch_wise_test_scores = []
+epoch_wise_dev_scores = []
+epoch_wise_test_scores = []
+test_for_best_dev = []
 count = 0
 for epoch in xrange(n_epochs):
     epoch_costs = []
@@ -387,10 +401,13 @@ for epoch in xrange(n_epochs):
                                  dev_data, id_to_tag, dico_tags)
             test_score = evaluate_phono_model(parameters, f_eval, test_sentences,
                                   test_data, id_to_tag, dico_tags)
+            batch_wise_dev_scores.append(dev_score)
+            batch_wise_test_scores.append(test_score)
             print "Score on dev: %.5f" % dev_score
             print "Score on test: %.5f" % test_score
             if dev_score > best_dev:
                 best_dev = dev_score
+                test_for_best_dev.append(test_score)
                 print "New best score on dev."
                 print "Saving model to disk..."
                 model.save()
@@ -398,3 +415,17 @@ for epoch in xrange(n_epochs):
                 best_test = test_score
                 print "New best score on test."
     print "Epoch %i done. Average cost: %f" % (epoch, np.mean(epoch_costs))
+    epoch_wise_dev_scores.append(dev_score)
+    epoch_wise_test_scores.append(test_score)
+print("List of all testfor best_dev:")
+print(test_for_best_dev)
+print("Best possible test score by choosing a new best on dev at some point: %f", max(test_for_best_dev))
+
+cPickle.dump(epoch_wise_dev_scores, open(os.path.join(model.model_path, "epoch_wise_dev_scores"), 'wb'))
+print(epoch_wise_dev_scores[-5:])
+cPickle.dump(epoch_wise_test_scores, open(os.path.join(model.model_path, "epoch_wise_test_scores"), 'wb'))
+print(epoch_wise_test_scores[-5:])
+cPickle.dump(batch_wise_dev_scores, open(os.path.join(model.model_path, "batch_wise_dev_scores"), 'wb'))
+print(batch_wise_dev_scores[-5:])
+cPickle.dump(batch_wise_test_scores, open(os.path.join(model.model_path, "batch_wise_test_scores"), 'wb'))
+print(batch_wise_test_scores[-5:])
